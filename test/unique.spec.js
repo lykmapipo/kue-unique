@@ -48,4 +48,16 @@ describe('kue#unique', function() {
         done();
     });
 
+    it('should be able to save job unique data', function(done) {
+        var uniqueJobData = {};
+        uniqueJobData[faker.random.uuid()] = faker.name.firstName();
+
+        Job.saveUniqueJobsData(uniqueJobData, function(error, uniqueJobsData) {
+            expect(error).to.not.exist;
+            expect(uniqueJobsData).to.exist;
+            expect(uniqueJobsData).to.eql(uniqueJobData);
+            done(error, uniqueJobsData);
+        });
+    });
+
 });

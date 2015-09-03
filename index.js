@@ -46,6 +46,11 @@ Job.getUniqueJobsData = function(done) {
             } catch (e) {
                 data = {};
             }
+            
+            //corrent null
+            if (_.isNull(data)) {
+                data = {};
+            }
 
             done(error, data);
         });
