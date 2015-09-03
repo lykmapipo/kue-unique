@@ -46,7 +46,7 @@ Job.getUniqueJobsData = function(done) {
             } catch (e) {
                 data = {};
             }
-            
+
             //corrent null
             if (_.isNull(data)) {
                 data = {};
@@ -54,6 +54,31 @@ Job.getUniqueJobsData = function(done) {
 
             done(error, data);
         });
+};
+
+/**
+ * @function
+ * @description retrieved saved unique job data
+ * @param {String} unique a unique job identifier
+ * @param {Function} done a callback to invoke on success or error
+ * @return {Object} unique jobs data
+ * @public
+ */
+Job.getUniqueJobData = function(unique, done) {
+
+    async.waterfall([
+
+        function loadUniqueJobsData(next) {
+            Job.getUniqueJobsData(next);
+        },
+
+        function findUniqueData(uniqueJobsData, next) {
+            //pick unique job data
+            var uniqueJobData = _.pick(uniqueJobsData, unique);
+            next(null, uniqueJobData);
+        }
+
+    ], done);
 };
 
 
@@ -70,9 +95,11 @@ Job.saveUniqueJobsData = function(uniqueJobData, done) {
     var key = Job.getUniqueJobsKey();
 
     async.waterfall([
+
         function loadUniqueJobsData(next) {
             Job.getUniqueJobsData(next);
         },
+
         function save(uniqueJobsData, next) {
             uniqueJobsData = _.merge(uniqueJobsData, uniqueJobData);
 
@@ -83,6 +110,7 @@ Job.saveUniqueJobsData = function(uniqueJobData, done) {
                         next(error, uniqueJobsData);
                     });
         }
+        
     ], done);
 };
 

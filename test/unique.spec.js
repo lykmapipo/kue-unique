@@ -3,6 +3,8 @@
 //dependencies
 var expect = require('chai').expect;
 var faker = require('faker');
+var _ = require('lodash');
+var async = require('async');
 var path = require('path');
 var kue = require(path.join(__dirname, '..', 'index'));
 var Job = kue.Job;
@@ -58,6 +60,27 @@ describe('kue#unique', function() {
             expect(uniqueJobsData).to.eql(uniqueJobData);
             done(error, uniqueJobsData);
         });
+    });
+
+
+    it('should be able to get job unique data using its `unique identifier`', function(done) {
+        var uniqueJobData = {};
+        uniqueJobData[faker.random.uuid()] = faker.name.firstName();
+
+        async.waterfall([
+            function save(next) {
+                Job.saveUniqueJobsData(uniqueJobData, next);
+            },
+            function get(savedUniqueJobData, next) {
+                Job
+                    .getUniqueJobData(_.keys(uniqueJobData)[0], function(error, foundUniqueJobData) {
+                        expect(error).to.not.exist;
+                        expect(foundUniqueJobData).to.exist;
+                        expect(foundUniqueJobData).to.eql(uniqueJobData);
+                        next(error, foundUniqueJobData);
+                    });
+            }
+        ], done);
     });
 
 });
