@@ -1,6 +1,6 @@
 # kue-unique
 
-[![Build Status](https://travis-ci.org/lykmapipo/kue-uniquesvg?branch=master)](https://travis-ci.org/lykmapipo/kue-unique)
+[![Build Status](https://travis-ci.org/lykmapipo/kue-unique.svg?branch=master)](https://travis-ci.org/lykmapipo/kue-unique)
 
 Unique job utility for [kue](https://github.com/Automattic/kue)
 
