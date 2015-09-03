@@ -161,7 +161,17 @@ Job.prototype.save = function(fn) {
                 else {
                     self.save(next);
                 }
+            },
+
+            function _saveUniqueJobsData(job, next) {
+                //save job unique data
+                var uniqueJobData = {};
+                uniqueJobData[self.data.unique] = job.id;
+                Job.saveUniqueJobsData(uniqueJobData, function(error /*,uniqueJobsData*/ ) {
+                    next(error, job);
+                });
             }
+
         ], function(error, job) {
             fn(error, job);
             self = job;
@@ -170,7 +180,7 @@ Job.prototype.save = function(fn) {
 
     //otherwise save a job
     else {
-        save.call(this, fn);
+        self = save.call(this, fn);
     }
 
     return self;
