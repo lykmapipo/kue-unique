@@ -73,7 +73,7 @@ Job.saveUniqueJobsData = function(uniqueJobData, done) {
 
             Job
                 .client
-                .set(key, JSON.stringify(uniqueJobsData), ,
+                .set(key, JSON.stringify(uniqueJobsData),
                     function(error /*, response*/ ) {
                         next(error, uniqueJobsData);
                     });
