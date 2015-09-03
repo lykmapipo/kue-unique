@@ -1,0 +1,8 @@
+node_modules
+test
+examples
+.tmp
+*.log
+*.pid
+.travis.yml
+Gruntfile.js
