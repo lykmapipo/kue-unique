@@ -14,6 +14,7 @@ var kue = require('kue');
 var Job = kue.Job;
 var _ = require('lodash');
 var async = require('async');
+var noop = function() {};
 
 
 /**
@@ -110,7 +111,7 @@ Job.saveUniqueJobsData = function(uniqueJobData, done) {
                         next(error, uniqueJobsData);
                     });
         }
-        
+
     ], done);
 };
 
@@ -133,17 +134,46 @@ Job.prototype.unique = function(unique) {
 //patch job save with unique ability checkup
 var save = Job.prototype.save;
 Job.prototype.save = function(fn) {
-    //if job is unique
-    //check if it already exist
-    //and return it
-    if (this.data && this.data.unique) {
+    /*jshint validthis:true*/
+    var self = this;
 
+    //correct callback
+    fn = fn || noop;
+
+    //if job is unique
+    if (this.data && this.data.unique) {
+        //check if it already exist
+        async.waterfall([
+
+            function tryGetExistingJobData(next) {
+                Job.getUniqueJobData(self.data.unique, next);
+            },
+
+            function tryGetExistingOrSaveJob(uniqueJobData, next) {
+                //try get existing job
+                if (uniqueJobData) {
+                    //get existing job
+                    var id = _.fist(_.value(uniqueJobData));
+                    self = Job.get(id, next);
+                }
+
+                //save a new job
+                else {
+                    self.save(next);
+                }
+            }
+        ], function(error, job) {
+            fn(error, job);
+            self = job;
+        });
     }
 
     //otherwise save a job
     else {
         save.call(this, fn);
     }
+
+    return self;
 };
 
 
