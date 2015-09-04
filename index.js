@@ -132,7 +132,7 @@ Job.prototype.unique = function(unique) {
 
 
 //patch job save with unique ability checkup
-var save = Job.prototype.save;
+var previousSave = Job.prototype.save;
 Job.prototype.save = function(fn) {
     /*jshint validthis:true*/
     var self = this;
@@ -151,22 +151,28 @@ Job.prototype.save = function(fn) {
 
             function tryGetExistingOrSaveJob(uniqueJobData, next) {
                 //try get existing job
-                if (uniqueJobData) {
+                var exists = _.size(_.keys(uniqueJobData)) > 0;
+
+                if (exists) {
                     //get existing job
-                    var id = _.fist(_.value(uniqueJobData));
-                    self = Job.get(id, next);
+                    var id = _.first(_.values(uniqueJobData));
+                    Job.get(id, next);
                 }
 
                 //save a new job
                 else {
-                    self.save(next);
+                    previousSave.call(self, function(error) {
+                        next(error, self);
+                    });
                 }
             },
 
             function _saveUniqueJobsData(job, next) {
+
                 //save job unique data
                 var uniqueJobData = {};
                 uniqueJobData[self.data.unique] = job.id;
+
                 Job.saveUniqueJobsData(uniqueJobData, function(error /*,uniqueJobsData*/ ) {
                     next(error, job);
                 });
@@ -180,7 +186,7 @@ Job.prototype.save = function(fn) {
 
     //otherwise save a job
     else {
-        self = save.call(this, fn);
+        self = previousSave.call(this, fn);
     }
 
     return self;

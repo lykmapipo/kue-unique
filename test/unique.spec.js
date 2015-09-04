@@ -83,4 +83,27 @@ describe('kue#unique', function() {
         ], done);
     });
 
+
+    it('should be return same job if saved multiple times', function(done) {
+        var unique = faker.name.firstName();
+
+        var job1 = q
+            .create('email', {
+                title: faker.lorem.sentence(),
+                to: faker.internet.email()
+            })
+            .unique(unique).save();
+
+        var job2 = q
+            .create('email', {
+                title: faker.lorem.sentence(),
+                to: faker.internet.email()
+            })
+            .unique(unique).save();
+
+        expect(job1.data.unique).to.be.equal(job2.data.unique);
+
+        done();
+    });
+
 });
