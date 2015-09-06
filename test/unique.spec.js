@@ -84,6 +84,36 @@ describe('kue#unique', function() {
     });
 
 
+    it('should be able to remove job unique data from jobs unique data', function(done) {
+        var uniqueJobData = {};
+        uniqueJobData[faker.random.uuid()] = faker.name.firstName();
+
+        async.waterfall([
+            function save(next) {
+                Job.saveUniqueJobsData(uniqueJobData, next);
+            },
+            function assertSaved(savedUniqueJobsData, next) {
+                var id = _.values(uniqueJobData)[0];
+                expect(_.values(savedUniqueJobsData)).to.contain(id);
+                next(null, id);
+            },
+
+            function remove(id, next) {
+                Job
+                    .removeUniqueJobData(id, function(error, uniqueJobsData) {
+                        expect(error).to.not.exist;
+                        expect(uniqueJobsData).to.exist;
+                        next(error, uniqueJobsData, id);
+                    });
+            },
+            function assertRemoved(uniqueJobsData, id, next) {
+                expect(_.values(uniqueJobsData)).to.not.contain(id);
+                next(null, id);
+            }
+        ], done);
+    });
+
+
     it('should be able to save unique job', function(done) {
         var unique = faker.name.firstName();
 

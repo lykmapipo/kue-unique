@@ -1,51 +1,49 @@
 {
-  "name": "kue-unique",
-  "version": "0.1.0",
-  "description": "Unique job utility for kue",
-  "main": "index.js",
-  "scripts": {
-    "test": "grunt test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lykmapipo/kue-unique.git"
-  },
-  "keywords": [
-    "kue",
-    "queue",
-    "que",
-    "q",
-    "unique",
-    "once",
-    "single",
-    "one"
-  ],
-  "author": "lykmapipo",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/lykmapipo/kue-unique/issues"
-  },
-  "homepage": "https://github.com/lykmapipo/kue-unique",
-  "contributors": [
-    {
-      "name": "lykmapipo",
-      "github": "https://github.com/lykmapipo"
+    "name": "kue-unique",
+    "version": "0.1.0",
+    "description": "Unique job utility for kue",
+    "main": "index.js",
+    "scripts": {
+        "test": "grunt test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/lykmapipo/kue-unique.git"
+    },
+    "keywords": [
+        "kue",
+        "queue",
+        "que",
+        "q",
+        "unique",
+        "once",
+        "single",
+        "one"
+    ],
+    "author": "lykmapipo",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/lykmapipo/kue-unique/issues"
+    },
+    "homepage": "https://github.com/lykmapipo/kue-unique",
+    "contributors": [{
+        "name": "lykmapipo",
+        "github": "https://github.com/lykmapipo"
+    }],
+    "devDependencies": {
+        "async": "^0.9.0",
+        "chai": "^2.2.0",
+        "faker": "^2.1.2",
+        "grunt": "^0.4.5",
+        "grunt-contrib-jshint": "^0.11.1",
+        "grunt-mocha-test": "^0.12.7",
+        "jshint-stylish": "^1.0.1",
+        "kue": "^0.9.3",
+        "lodash": "^3.6.0",
+        "mocha": "^2.2.4"
+    },
+    "dependencies": {
+        "async": "^1.4.2",
+        "lodash": "^3.10.1"
     }
-  ],
-  "devDependencies": {
-    "async": "^0.9.0",
-    "chai": "^2.2.0",
-    "faker": "^2.1.2",
-    "grunt": "^0.4.5",
-    "grunt-contrib-jshint": "^0.11.1",
-    "grunt-mocha-test": "^0.12.7",
-    "jshint-stylish": "^1.0.1",
-    "kue": "^0.9.3",
-    "lodash": "^3.6.0",
-    "mocha": "^2.2.4"
-  },
-  "dependencies": {
-    "async": "^1.4.2",
-    "lodash": "^3.10.1"
-  }
 }

@@ -83,6 +83,41 @@ Job.getUniqueJobData = function(unique, done) {
     ], done);
 };
 
+/**
+ * @function
+ * @description remove unique jobs data into redis backend
+ * @param {Number} id job id to remove from unique job datas
+ * @param {Function} done a callback to invoke on success or error
+ * @return {Object} unique jobs data
+ * @private
+ */
+Job.removeUniqueJobData = function(id, done) {
+
+    var key = Job.getUniqueJobsKey();
+
+    async.waterfall([
+
+        function loadUniqueJobsData(next) {
+            Job.getUniqueJobsData(next);
+        },
+
+        function save(uniqueJobsData, next) {
+            //remove given job from unique job data
+            uniqueJobsData = _.omit(uniqueJobsData, function(value) {
+                return value === id;
+            });
+
+            Job
+                .client
+                .set(key, JSON.stringify(uniqueJobsData),
+                    function(error /*, response*/ ) {
+                        next(error, uniqueJobsData);
+                    });
+        }
+
+    ], done);
+};
+
 
 /**
  * @function
@@ -132,7 +167,7 @@ Job.prototype.unique = function(unique) {
 };
 
 
-//patch job save with unique ability checkup
+//patch job save with unique checkup
 var previousSave = Job.prototype.save;
 Job.prototype.save = function(done) {
     /*jshint validthis:true*/
@@ -190,6 +225,8 @@ Job.prototype.save = function(done) {
     }
 };
 
+//patch job remove with unique checkup
+// var previousRemove = Job.prototype.remove;
 
 /**
  * @description export kue with job unique behavior attached to job
