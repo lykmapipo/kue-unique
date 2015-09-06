@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/lykmapipo/kue-unique.svg?branch=master)](https://travis-ci.org/lykmapipo/kue-unique)
 
-Unique job utility for [kue](https://github.com/Automattic/kue). If `job` already exists it will return it, otherwise it will save a new `job`.
+Unique job utility for [kue](https://github.com/Automattic/kue). If `job` already exists it will return it, otherwise it will create a new `job` and return it.
 
 *Note!:To ensure unique jobs, `save callback` and `remove callback` must be passed when working with unique job(s)*
 
