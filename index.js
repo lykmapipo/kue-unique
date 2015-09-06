@@ -227,7 +227,29 @@ Job.prototype.save = function(done) {
 
 //patch job remove with unique checkup
 var previousRemove = Job.prototype.remove;
+Job.prototype.remove = function(done) {
+    /*jshint validthis:true*/
+    var self = this;
 
+    //correct callback
+    done = done || noop;
+
+    async.parallel({
+
+        removeJob: function(next) {
+            previousRemove.call(self, next);
+        }.bind(self),
+
+        removeUniqueData: function(next) {
+            Job.removeUniqueJobData(self.id, next);
+        }.bind(self)
+
+    }, function finalize(error /*, results*/ ) {
+        done(error, self);
+    }.bind(self));
+
+    return this;
+};
 
 /**
  * @description export kue with job unique behavior attached to job

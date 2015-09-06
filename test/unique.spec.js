@@ -185,4 +185,57 @@ describe('kue#unique', function() {
         done();
     });
 
+
+    it('should be able to remove save unique job and its associated data', function(done) {
+        var unique = faker.name.firstName();
+        var _job;
+
+        async.waterfall([
+                function save(next) {
+                    q.create('email', {
+                            title: faker.lorem.sentence(),
+                            to: faker.internet.email()
+                        })
+                        .unique(unique)
+                        .save(next);
+                },
+
+                function remove(job, next) {
+                    job.remove(next);
+                },
+
+                function assertRemove(job, next) {
+                    expect(job).to.exist;
+                    _job = job;
+                    next(null, job);
+                },
+
+                function getRemoveJob(job, next) {
+                    async.parallel({
+                        job: function getJob(_next) {
+                            Job.get(job.id, function(error, job) {
+
+                                expect(error).to.exist;
+                                expect(error.message)
+                                    .to.be.equal('job "' + _job.id + '" doesnt exist');
+
+                                _next(null, job);
+                            });
+                        },
+                        data: function getUniqueJobsData(_next) {
+                            Job.getUniqueJobsData(_next);
+                        }
+                    }, next);
+                }
+            ],
+            function(error, results) {
+
+                expect(results.job).to.not.exist;
+                expect(_.values(results.data)).to.not.contain(_job.id);
+
+                done();
+
+            });
+    });
+
 });
