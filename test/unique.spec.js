@@ -84,26 +84,43 @@ describe('kue#unique', function() {
     });
 
 
-    it('should be return same job if saved multiple times', function(done) {
+    it('should be able to return same unique job if saved multiple times', function(done) {
         var unique = faker.name.firstName();
 
-        var job1 = q
-            .create('email', {
-                title: faker.lorem.sentence(),
-                to: faker.internet.email()
-            })
-            .unique(unique).save();
+        async.waterfall([
+                //save first job
+                function(next) {
+                    q.create('email', {
+                            title: faker.lorem.sentence(),
+                            to: faker.internet.email()
+                        })
+                        .unique(unique)
+                        .save(next);
+                },
 
-        var job2 = q
-            .create('email', {
-                title: faker.lorem.sentence(),
-                to: faker.internet.email()
-            })
-            .unique(unique).save();
+                //later try to save another
+                //job with same unique value 
+                function(job1, next) {
+                    q.create('email', {
+                            title: faker.lorem.sentence(),
+                            to: faker.internet.email()
+                        })
+                        .unique(unique)
+                        .save(function(error, job2) {
+                            next(error, job1, job2);
+                        });
+                }
+            ],
+            function(error, job1, job2) {
+                
+                expect(job1.id).to.be.equal(job2.id);
+                expect(job1.data.title).to.be.equal(job2.data.title);
+                expect(job1.data.to).to.be.equal(job2.data.to);
+                expect(job1.data.unique).to.be.equal(job2.data.unique);
 
-        expect(job1.data.unique).to.be.equal(job2.data.unique);
+                done();
 
-        done();
+            });
     });
 
 });

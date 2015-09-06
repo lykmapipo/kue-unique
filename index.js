@@ -57,6 +57,7 @@ Job.getUniqueJobsData = function(done) {
         });
 };
 
+
 /**
  * @function
  * @description retrieved saved unique job data
@@ -133,15 +134,15 @@ Job.prototype.unique = function(unique) {
 
 //patch job save with unique ability checkup
 var previousSave = Job.prototype.save;
-Job.prototype.save = function(fn) {
+Job.prototype.save = function(done) {
     /*jshint validthis:true*/
     var self = this;
 
     //correct callback
-    fn = fn || noop;
+    done = done || noop;
 
     //if job is unique
-    if (this.data && this.data.unique) {
+    if (self.data && self.data.unique) {
         //check if it already exist
         async.waterfall([
 
@@ -168,10 +169,9 @@ Job.prototype.save = function(fn) {
             },
 
             function _saveUniqueJobsData(job, next) {
-
                 //save job unique data
                 var uniqueJobData = {};
-                uniqueJobData[self.data.unique] = job.id;
+                uniqueJobData[job.data.unique] = job.id;
 
                 Job.saveUniqueJobsData(uniqueJobData, function(error /*,uniqueJobsData*/ ) {
                     next(error, job);
@@ -179,14 +179,14 @@ Job.prototype.save = function(fn) {
             }
 
         ], function(error, job) {
-            fn(error, job);
             self = job;
+            done(error, job);
         });
     }
 
     //otherwise save a job
     else {
-        self = previousSave.call(this, fn);
+        self = previousSave.call(self, done);
     }
 
     return self;
