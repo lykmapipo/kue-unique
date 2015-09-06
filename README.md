@@ -17,7 +17,7 @@ $ npm install --save kue-unique
 var kue = require('kue-unique');
 var queue = kue.createQueue();
 
-//create your unique job
+//create and save unique job
 var job = queue.create('email', {
     title: 'welcome email for tj'
   , to: 'tj@learnboost.com'
@@ -25,8 +25,17 @@ var job = queue.create('email', {
 })
 .unique(<job_unique_identifier>)
 .save( function(error, job){
-   if( !error ) console.log( job.id );
+   if( !error ) {
+        console.log( job.id );
+    }
 });
+
+//removing existing unique job
+job.remove(function(error, job){
+   if( !error ) {
+        console.log( job.id );
+    }
+})
 ```
 
 ## Testing
