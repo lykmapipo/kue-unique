@@ -4,7 +4,7 @@
 
 Unique job utility for [kue](https://github.com/Automattic/kue)
 
-*Warning!:To ensure unique jobs, `save callback` must be passed*
+*Note!:To ensure unique jobs, `save callback` and `remove callback` must be passed when working with unique job(s)*
 
 ## Installation
 ```sh

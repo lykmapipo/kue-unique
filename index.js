@@ -226,7 +226,8 @@ Job.prototype.save = function(done) {
 };
 
 //patch job remove with unique checkup
-// var previousRemove = Job.prototype.remove;
+var previousRemove = Job.prototype.remove;
+
 
 /**
  * @description export kue with job unique behavior attached to job
