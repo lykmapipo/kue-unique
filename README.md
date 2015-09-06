@@ -2,18 +2,18 @@
 
 [![Build Status](https://travis-ci.org/lykmapipo/kue-unique.svg?branch=master)](https://travis-ci.org/lykmapipo/kue-unique)
 
-Unique job utility for [kue](https://github.com/Automattic/kue)
+Unique job utility for [kue](https://github.com/Automattic/kue). If `job` already exists it will return it, otherwise it will save a new `job`.
 
 *Note!:To ensure unique jobs, `save callback` and `remove callback` must be passed when working with unique job(s)*
 
 ## Installation
 ```sh
-$ npm install --save kue-unique
+$ npm install --save async lodash kue kue-unique
 ```
 
 ## Usage
 ```js
-//first load queue
+//load kue
 var kue = require('kue-unique');
 var queue = kue.createQueue();
 

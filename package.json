@@ -18,7 +18,12 @@
         "unique",
         "once",
         "single",
-        "one"
+        "one",
+        "only",
+        "jobs",
+        "redis",
+        "job",
+        "worker"
     ],
     "author": "lykmapipo",
     "license": "MIT",
@@ -41,9 +46,5 @@
         "kue": "^0.9.3",
         "lodash": "^3.6.0",
         "mocha": "^2.2.4"
-    },
-    "dependencies": {
-        "async": "^1.4.2",
-        "lodash": "^3.10.1"
     }
 }
