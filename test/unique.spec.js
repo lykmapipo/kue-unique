@@ -112,7 +112,7 @@ describe('kue#unique', function() {
                 }
             ],
             function(error, job1, job2) {
-                
+
                 expect(job1.id).to.be.equal(job2.id);
                 expect(job1.data.title).to.be.equal(job2.data.title);
                 expect(job1.data.to).to.be.equal(job2.data.to);
@@ -121,6 +121,20 @@ describe('kue#unique', function() {
                 done();
 
             });
+    });
+
+
+    it('should be able to save non-unique jobs as normal', function(done) {
+        var job = q.create('email', {
+                title: faker.lorem.sentence(),
+                to: faker.internet.email()
+            })
+            .save();
+            
+        expect(job).to.exist;
+        expect(job.data).to.exist;
+
+        done();
     });
 
 });
