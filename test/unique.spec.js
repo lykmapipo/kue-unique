@@ -186,7 +186,7 @@ describe('kue#unique', function() {
     });
 
 
-    it('should be able to remove save unique job and its associated data', function(done) {
+    it('should be able to remove saved unique job and its associated data', function(done) {
         var unique = faker.name.firstName();
         var _job;
 
@@ -236,6 +236,20 @@ describe('kue#unique', function() {
                 done();
 
             });
+    });
+
+    it('should be able to remove non-unique jobs as normal', function(done) {
+        var job = q.create('email', {
+            title: faker.lorem.sentence(),
+            to: faker.internet.email()
+        });
+
+        job = job.remove();
+
+        expect(job).to.exist;
+        expect(job.data).to.exist;
+
+        done();
     });
 
 });
