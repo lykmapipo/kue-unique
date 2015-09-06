@@ -84,6 +84,24 @@ describe('kue#unique', function() {
     });
 
 
+    it('should be able to save unique job', function(done) {
+        var unique = faker.name.firstName();
+
+        q
+            .create('email', {
+                title: faker.lorem.sentence(),
+                to: faker.internet.email()
+            })
+            .unique(unique)
+            .save(function(error, job) {
+                expect(job).to.exist;
+                expect(job.data).to.exist;
+
+                done();
+            });
+    });
+
+
     it('should be able to return same unique job if saved multiple times', function(done) {
         var unique = faker.name.firstName();
 
@@ -130,7 +148,7 @@ describe('kue#unique', function() {
                 to: faker.internet.email()
             })
             .save();
-            
+
         expect(job).to.exist;
         expect(job.data).to.exist;
 

@@ -180,16 +180,14 @@ Job.prototype.save = function(done) {
 
         ], function(error, job) {
             self = job;
-            done(error, job);
+            return done(error, job);
         });
     }
 
     //otherwise save a job
     else {
-        self = previousSave.call(self, done);
+        return previousSave.call(self, done);
     }
-
-    return self;
 };
 
 

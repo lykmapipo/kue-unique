@@ -4,6 +4,8 @@
 
 Unique job utility for [kue](https://github.com/Automattic/kue)
 
+*Warning!:To ensure unique jobs, `save callback` must be passed*
+
 ## Installation
 ```sh
 $ npm install --save kue-unique
@@ -22,8 +24,8 @@ var job = queue.create('email', {
   , template: 'welcome-email'
 })
 .unique(<job_unique_identifier>)
-.save( function(err){
-   if( !err ) console.log( job.id );
+.save( function(error, job){
+   if( !error ) console.log( job.id );
 });
 ```
 
