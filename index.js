@@ -21,7 +21,7 @@ var noop = function() {};
  * @function
  * @description compute a key used to store unique jobs map
  * @return {String} a key to retrieve unique jobs map
- * @public
+ * @private
  */
 Job.getUniqueJobsKey = function() {
     return Job.client.getKey('unique:jobs');
@@ -33,7 +33,7 @@ Job.getUniqueJobsKey = function() {
  * @description retrieved saved unique jobs data from redis backend
  * @param {Function} done a callback to invoke on success or error
  * @return {Object} unique jobs data
- * @public
+ * @private
  */
 Job.getUniqueJobsData = function(done) {
     var key = Job.getUniqueJobsKey();
@@ -64,7 +64,7 @@ Job.getUniqueJobsData = function(done) {
  * @param {String} unique a unique job identifier
  * @param {Function} done a callback to invoke on success or error
  * @return {Object} unique jobs data
- * @public
+ * @private
  */
 Job.getUniqueJobData = function(unique, done) {
 
@@ -86,7 +86,7 @@ Job.getUniqueJobData = function(unique, done) {
 
 /**
  * @function
- * @description remove unique jobs data into redis backend
+ * @description remove unique jobs data from redis backend
  * @param {Number} id job id to remove from unique job datas
  * @param {Function} done a callback to invoke on success or error
  * @return {Object} unique jobs data
@@ -157,7 +157,7 @@ Job.saveUniqueJobsData = function(uniqueJobData, done) {
 /**
  * @description extend job data with unique identifier
  * @param  {String} unique a unique identifier for the job
- * @return {Job}        jib instance
+ * @return {Job}        job instance
  */
 Job.prototype.unique = function(unique) {
     //extend job data with unique key
@@ -171,20 +171,18 @@ Job.prototype.unique = function(unique) {
 //patch job save with unique checkup
 var previousSave = Job.prototype.save;
 Job.prototype.save = function(done) {
-    /*jshint validthis:true*/
-    var self = this;
-
     //correct callback
     done = done || noop;
 
     //if job is unique
-    if (self.data && self.data.unique) {
+    var isUniqueJob = this.data && this.data.unique;
+    if (isUniqueJob) {
         //check if it already exist
         async.waterfall([
 
             function tryGetExistingJobData(next) {
-                Job.getUniqueJobData(self.data.unique, next);
-            },
+                Job.getUniqueJobData(this.data.unique, next);
+            }.bind(this),
 
             function tryGetExistingOrSaveJob(uniqueJobData, next) {
                 //try get existing job
@@ -198,11 +196,11 @@ Job.prototype.save = function(done) {
 
                 //save a new job
                 else {
-                    previousSave.call(self, function(error) {
-                        next(error, self);
-                    });
+                    previousSave.call(this, function(error) {
+                        next(error, this);
+                    }.bind(this));
                 }
-            },
+            }.bind(this),
 
             function _saveUniqueJobsData(job, next) {
                 //save job unique data
@@ -215,14 +213,13 @@ Job.prototype.save = function(done) {
             }
 
         ], function(error, job) {
-            self = job;
             return done(error, job);
         });
     }
 
     //otherwise save a job
     else {
-        return previousSave.call(self, done);
+        return previousSave.call(this, done);
     }
 };
 
