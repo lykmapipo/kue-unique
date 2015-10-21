@@ -83,6 +83,7 @@ Job.getUniqueJobData = function(unique, done) {
     ], done);
 };
 
+
 /**
  * @function
  * @description remove unique jobs data into redis backend
@@ -225,6 +226,7 @@ Job.prototype.save = function(done) {
     }
 };
 
+
 //patch job remove with unique checkup
 var previousRemove = Job.prototype.remove;
 Job.prototype.remove = function(done) {
@@ -247,6 +249,7 @@ Job.prototype.remove = function(done) {
 
     return this;
 };
+
 
 /**
  * @description export kue with job unique behavior attached to job

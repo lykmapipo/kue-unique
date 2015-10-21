@@ -11,7 +11,7 @@ var Job = kue.Job;
 var q;
 
 
-describe('kue#unique', function() {
+describe('kue unique', function() {
     before(function(done) {
         q = kue.createQueue();
         done();
