@@ -48,9 +48,9 @@ var job = q.createJob('single', {
 
 //schedule a unique job then
 job.save(function(error, job) {
-    //if job exists 
-    //update it for next execution
-    if (job) {
-        job.inactive();
+    if (error) {
+        console.log(error);
+    } else {
+        console.log(job.id);
     }
 });
