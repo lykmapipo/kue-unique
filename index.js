@@ -228,25 +228,22 @@ Job.prototype.save = function(done) {
 //patch job remove with unique checkup
 var previousRemove = Job.prototype.remove;
 Job.prototype.remove = function(done) {
-    /*jshint validthis:true*/
-    var self = this;
-
     //correct callback
     done = done || noop;
 
     async.parallel({
 
         removeJob: function(next) {
-            previousRemove.call(self, next);
-        }.bind(self),
+            previousRemove.call(this, next);
+        }.bind(this),
 
         removeUniqueData: function(next) {
-            Job.removeUniqueJobData(self.id, next);
-        }.bind(self)
+            Job.removeUniqueJobData(this.id, next);
+        }.bind(this)
 
     }, function finalize(error /*, results*/ ) {
-        done(error, self);
-    }.bind(self));
+        done(error, this);
+    }.bind(this));
 
     return this;
 };
