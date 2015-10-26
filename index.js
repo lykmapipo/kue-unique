@@ -191,7 +191,11 @@ Job.prototype.save = function(done) {
                 if (exists) {
                     //get existing job
                     var id = _.first(_.values(uniqueJobData));
-                    Job.get(id, next);
+                    Job.get(id, function(error, job) {
+                        //flag job as already exist
+                        job.alreadyExist = true;
+                        next(error, job);
+                    });
                 }
 
                 //save a new job

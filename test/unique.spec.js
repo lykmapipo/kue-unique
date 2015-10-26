@@ -161,6 +161,7 @@ describe('kue unique', function() {
             ],
             function(error, job1, job2) {
 
+                expect(job2.alreadyExist).to.be.true;
                 expect(job1.id).to.be.equal(job2.id);
                 expect(job1.data.title).to.be.equal(job2.data.title);
                 expect(job1.data.to).to.be.equal(job2.data.to);
