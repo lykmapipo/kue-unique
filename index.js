@@ -36,23 +36,16 @@ Job.getUniqueJobsKey = function() {
  * @private
  */
 Job.getUniqueJobsData = function(done) {
-    var key = Job.getUniqueJobsKey();
 
+    var key = this.getUniqueJobsKey();
     Job
         .client
-        .get(key, function(error, data) {
+        .hgetall(key,function(error, data) {
 
-            try {
-                data = JSON.parse(data);
-            } catch (e) {
-                data = {};
-            }
-
-            //corrent null
+            //correct null
             if (_.isNull(data)) {
                 data = {};
             }
-
             done(error, data);
         });
 };
@@ -68,19 +61,21 @@ Job.getUniqueJobsData = function(done) {
  */
 Job.getUniqueJobData = function(unique, done) {
 
-    async.waterfall([
+  var key = this.getUniqueJobsKey();
 
-        function loadUniqueJobsData(next) {
-            Job.getUniqueJobsData(next);
-        },
-
-        function findUniqueData(uniqueJobsData, next) {
+        Job.client.hget(key,unique,function(error,data){
             //pick unique job data
-            var uniqueJobData = _.pick(uniqueJobsData, unique);
-            next(null, uniqueJobData);
-        }
+            var uniqueJobData = {};
+            if(data){
 
-    ], done);
+              if (!isNaN(data)){
+               data = parseInt(data);
+              }
+              uniqueJobData[unique]= data;
+            }
+
+            done(null, uniqueJobData);
+        });
 };
 
 
@@ -102,18 +97,21 @@ Job.removeUniqueJobData = function(id, done) {
             Job.getUniqueJobsData(next);
         },
 
-        function save(uniqueJobsData, next) {
+        function dosave(uniqueJobsData, next) {
             //remove given job from unique job data
-            uniqueJobsData = _.omit(uniqueJobsData, function(value) {
-                return value === id;
-            });
+            //we have an id, lets find the key name.
+            //
+            var unique = Object.keys(uniqueJobsData).filter(function(key) {return uniqueJobsData[key] === id;})[0];
 
             Job
                 .client
-                .set(key, JSON.stringify(uniqueJobsData),
+                .hdel(key,unique,
                     function(error /*, response*/ ) {
-                        next(error, uniqueJobsData);
+                        next(error);
                     });
+        },
+        function reloadUniqueJobsData(next){
+          Job.getUniqueJobsData(next);
         }
 
     ], done);
@@ -132,24 +130,17 @@ Job.saveUniqueJobsData = function(uniqueJobData, done) {
 
     var key = Job.getUniqueJobsKey();
 
-    async.waterfall([
+    var field;
+    if(Object.keys(uniqueJobData).length > 0){ field = Object.keys(uniqueJobData)[0];}
 
-        function loadUniqueJobsData(next) {
-            Job.getUniqueJobsData(next);
-        },
+    Job.client.hset(key,field,uniqueJobData[field], function(error /*,
+    response*/ ) {
+    if (error){
+      return done(error,null);
+    }
+    Job.getUniqueJobsData(done);
+    });
 
-        function save(uniqueJobsData, next) {
-            uniqueJobsData = _.merge(uniqueJobsData, uniqueJobData);
-
-            Job
-                .client
-                .set(key, JSON.stringify(uniqueJobsData),
-                    function(error /*, response*/ ) {
-                        next(error, uniqueJobsData);
-                    });
-        }
-
-    ], done);
 };
 
 
@@ -173,7 +164,6 @@ var previousSave = Job.prototype.save;
 Job.prototype.save = function(done) {
     //correct callback
     done = done || noop;
-
     //if job is unique
     var isUniqueJob = this.data && this.data.unique;
     if (isUniqueJob) {
@@ -213,6 +203,7 @@ Job.prototype.save = function(done) {
             function _saveUniqueJobsData(job, next) {
                 //save job unique data
                 var uniqueJobData = {};
+
                 uniqueJobData[job.data.unique] = job.id;
 
                 Job.saveUniqueJobsData(uniqueJobData, function(error /*,uniqueJobsData*/ ) {
@@ -237,7 +228,6 @@ var previousRemove = Job.prototype.remove;
 Job.prototype.remove = function(done) {
     //correct callback
     done = done || noop;
-
     async.parallel({
 
         removeJob: function(next) {
