@@ -6,6 +6,8 @@ Unique job utility for [kue](https://github.com/Automattic/kue). If `job` alread
 
 *Note!:To ensure unique jobs, `save callback` and `remove callback` must be passed when working with unique job(s)*
 
+*Warning!: There is data stucture change when moving from 0.1.x to 1.x. In 1.x `kue-unique` migrate to us redis hash to save unique job data instead on string.*
+
 ## Installation
 ```sh
 $ npm install --save async lodash kue kue-unique
