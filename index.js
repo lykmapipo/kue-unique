@@ -107,6 +107,8 @@ Job.removeUniqueJobData = function(id, done) {
             //remove given job from unique job data
             //we have an id, lets find the key name.
             //
+            // all redis values are strings, to make === work, have to convert to string.
+            id = id.toString();
             var unique = Object.keys(uniqueJobsData).filter(function(key) {
                 return uniqueJobsData[key] === id;
             })[0];
