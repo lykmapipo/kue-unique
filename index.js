@@ -113,12 +113,16 @@ Job.removeUniqueJobData = function(id, done) {
                 return uniqueJobsData[key] === id;
             })[0];
 
-            Job
-                .client
-                .hdel(key, unique,
-                    function(error /*, response*/ ) {
-                        next(error);
-                    });
+            if (unique) {
+                return Job
+                    .client
+                    .hdel(key, unique,
+                        function(error /*, response*/ ) {
+                            next(error);
+                        });
+            }
+            
+            next(null);
         },
 
         function reloadUniqueJobsData(next) {
