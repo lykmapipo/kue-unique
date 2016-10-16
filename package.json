@@ -1,50 +1,50 @@
 {
-    "name": "kue-unique",
-    "version": "1.0.0",
-    "description": "Unique job utility for kue",
-    "main": "index.js",
-    "scripts": {
-        "test": "grunt test"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/lykmapipo/kue-unique.git"
-    },
-    "keywords": [
-        "kue",
-        "queue",
-        "que",
-        "q",
-        "unique",
-        "once",
-        "single",
-        "one",
-        "only",
-        "jobs",
-        "redis",
-        "job",
-        "worker"
-    ],
-    "author": "lykmapipo",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/lykmapipo/kue-unique/issues"
-    },
-    "homepage": "https://github.com/lykmapipo/kue-unique",
-    "contributors": [{
-        "name": "lykmapipo",
-        "github": "https://github.com/lykmapipo"
-    }],
-    "devDependencies": {
-        "async": "^1.4.2",
-        "chai": "^3.3.0",
-        "faker": "^3.0.1",
-        "grunt": "^0.4.5",
-        "grunt-contrib-jshint": "^0.11.3",
-        "grunt-mocha-test": "^0.12.7",
-        "jshint-stylish": "^2.0.1",
-        "kue": "^0.9.6",
-        "lodash": "^3.10.1",
-        "mocha": "^2.3.3"
-    }
+  "name": "kue-unique",
+  "version": "1.0.1",
+  "description": "Unique job utility for kue",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lykmapipo/kue-unique.git"
+  },
+  "keywords": [
+    "kue",
+    "queue",
+    "que",
+    "q",
+    "unique",
+    "once",
+    "single",
+    "one",
+    "only",
+    "jobs",
+    "redis",
+    "job",
+    "worker"
+  ],
+  "author": "lykmapipo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lykmapipo/kue-unique/issues"
+  },
+  "homepage": "https://github.com/lykmapipo/kue-unique",
+  "contributors": [{
+    "name": "lykmapipo",
+    "github": "https://github.com/lykmapipo"
+  }],
+  "devDependencies": {
+    "async": "^1.4.2",
+    "chai": "^3.3.0",
+    "faker": "^3.0.1",
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.11.3",
+    "grunt-mocha-test": "^0.12.7",
+    "jshint-stylish": "^2.0.1",
+    "kue": "^0.9.6",
+    "lodash": "^3.10.1",
+    "mocha": "^2.3.3"
+  }
 }

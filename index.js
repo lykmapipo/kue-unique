@@ -14,7 +14,7 @@ var kue = require('kue');
 var Job = kue.Job;
 var _ = require('lodash');
 var async = require('async');
-var noop = function() {};
+var noop = function () {};
 
 
 /**
@@ -23,8 +23,8 @@ var noop = function() {};
  * @return {String} a key to retrieve unique jobs map
  * @private
  */
-Job.getUniqueJobsKey = function() {
-    return Job.client.getKey('unique:jobs');
+Job.getUniqueJobsKey = function () {
+  return Job.client.getKey('unique:jobs');
 };
 
 
@@ -35,21 +35,29 @@ Job.getUniqueJobsKey = function() {
  * @return {Object} unique jobs data
  * @private
  */
-Job.getUniqueJobsData = function(done) {
+Job.getUniqueJobsData = function (done) {
 
-    var key = this.getUniqueJobsKey();
-    Job
-        .client
-        .hgetall(key, function(error, data) {
+  var key = this.getUniqueJobsKey();
+  Job
+    .client
+    .hgetall(key, function (error, data) {
 
-            //correct null
-            if (_.isNull(data)) {
-                data = {};
-            }
-
-            done(error, data);
-
+      //correct null
+      if (_.isNull(data)) {
+        data = {};
+      } else {
+        //deserialize string to number
+        //once fetched from redis
+        _.forEach(data, function (value, key) {
+          if (!isNaN(value)) {
+            data[key] = parseInt(value);
+          }
         });
+      }
+
+      done(error, data);
+
+    });
 };
 
 
@@ -61,26 +69,26 @@ Job.getUniqueJobsData = function(done) {
  * @return {Object} unique jobs data
  * @private
  */
-Job.getUniqueJobData = function(unique, done) {
+Job.getUniqueJobData = function (unique, done) {
 
-    var key = this.getUniqueJobsKey();
+  var key = this.getUniqueJobsKey();
 
-    Job.client.hget(key, unique, function(error, data) {
-        //pick unique job data
-        var uniqueJobData = {};
+  Job.client.hget(key, unique, function (error, data) {
+    //pick unique job data
+    var uniqueJobData = {};
 
-        if (data) {
+    if (data) {
 
-            if (!isNaN(data)) {
-                data = parseInt(data);
-            }
+      if (!isNaN(data)) {
+        data = parseInt(data);
+      }
 
-            uniqueJobData[unique] = data;
-        }
+      uniqueJobData[unique] = data;
+    }
 
-        done(null, uniqueJobData);
+    done(null, uniqueJobData);
 
-    });
+  });
 
 };
 
@@ -93,37 +101,36 @@ Job.getUniqueJobData = function(unique, done) {
  * @return {Object} unique jobs data
  * @private
  */
-Job.removeUniqueJobData = function(id, done) {
+Job.removeUniqueJobData = function (id, done) {
 
-    var key = Job.getUniqueJobsKey();
+  var key = Job.getUniqueJobsKey();
 
-    async.waterfall([
+  async.waterfall([
 
-        function loadUniqueJobsData(next) {
-            Job.getUniqueJobsData(next);
-        },
+    function loadUniqueJobsData(next) {
+      Job.getUniqueJobsData(next);
+    },
 
-        function dosave(uniqueJobsData, next) {
-            //remove given job from unique job data
-            //we have an id, lets find the key name.
-            //
-            var unique = Object.keys(uniqueJobsData).filter(function(key) {
-                return uniqueJobsData[key] === id;
-            })[0];
+    function dosave(uniqueJobsData, next) {
+      //remove given job from unique job data
+      //we have an id, lets find the key name.
+      //
+      var unique = Object.keys(uniqueJobsData).filter(function (key) {
+        return uniqueJobsData[key] === id;
+      })[0];
 
-            Job
-                .client
-                .hdel(key, unique,
-                    function(error /*, response*/ ) {
-                        next(error);
-                    });
-        },
+      Job
+        .client
+        .hdel(key, unique, function (error /*, response*/ ) {
+          next(error);
+        });
+    },
 
-        function reloadUniqueJobsData(next) {
-            Job.getUniqueJobsData(next);
-        }
+    function reloadUniqueJobsData(next) {
+      Job.getUniqueJobsData(next);
+    }
 
-    ], done);
+  ], done);
 
 };
 
@@ -136,27 +143,27 @@ Job.removeUniqueJobData = function(id, done) {
  * @return {Object} unique jobs data
  * @private
  */
-Job.saveUniqueJobsData = function(uniqueJobData, done) {
+Job.saveUniqueJobsData = function (uniqueJobData, done) {
 
-    var key = Job.getUniqueJobsKey();
+  var key = Job.getUniqueJobsKey();
 
-    var field;
-    if (Object.keys(uniqueJobData).length > 0) {
-        field = Object.keys(uniqueJobData)[0];
-    }
+  var field;
+  if (Object.keys(uniqueJobData).length > 0) {
+    field = Object.keys(uniqueJobData)[0];
+  }
 
-    Job
-        .client
-        .hset(key, field, uniqueJobData[field], function(error /*,response*/ ) {
+  Job
+    .client
+    .hset(key, field, uniqueJobData[field], function (error /*,response*/ ) {
 
-            if (error) {
-                return done(error, null);
-            } else {
+      if (error) {
+        return done(error, null);
+      } else {
 
-                Job.getUniqueJobsData(done);
-            }
+        Job.getUniqueJobsData(done);
+      }
 
-        });
+    });
 
 };
 
@@ -167,110 +174,110 @@ Job.saveUniqueJobsData = function(uniqueJobData, done) {
  * @param  {String} unique a unique identifier for the job
  * @return {Job}        job instance
  */
-Job.prototype.unique = function(unique) {
+Job.prototype.unique = function (unique) {
 
-    //extend job data with unique key
-    _.merge(this.data || {}, {
-        unique: unique
-    });
+  //extend job data with unique key
+  _.merge(this.data || {}, {
+    unique: unique
+  });
 
-    return this;
+  return this;
 
 };
 
 
 //patch job save with unique checkup
 var previousSave = Job.prototype.save;
-Job.prototype.save = function(done) {
-    //correct callback
-    done = done || noop;
+Job.prototype.save = function (done) {
+  //correct callback
+  done = done || noop;
 
-    //if job is unique
-    var isUniqueJob = this.data && this.data.unique;
-    if (isUniqueJob) {
-        //check if it already exist
-        async.waterfall([
+  //if job is unique
+  var isUniqueJob = this.data && this.data.unique;
+  if (isUniqueJob) {
+    //check if it already exist
+    async.waterfall([
 
-            function tryGetExistingJobData(next) {
-                Job.getUniqueJobData(this.data.unique, next);
-            }.bind(this),
+      function tryGetExistingJobData(next) {
+        Job.getUniqueJobData(this.data.unique, next);
+      }.bind(this),
 
-            function tryGetExistingOrSaveJob(uniqueJobData, next) {
-                //try get existing job
-                var exists = _.size(_.keys(uniqueJobData)) > 0;
+      function tryGetExistingOrSaveJob(uniqueJobData, next) {
+        //try get existing job
+        var exists = _.size(_.keys(uniqueJobData)) > 0;
 
-                if (exists) {
-                    //get existing job
-                    var id = _.first(_.values(uniqueJobData));
-                    Job.get(id, function(error, job) {
+        if (exists) {
+          //get existing job
+          var id = _.first(_.values(uniqueJobData));
+          Job.get(id, function (error, job) {
 
-                        //flag job as already exist
-                        if (job) {
-                            job.alreadyExist = true;
-                        }
-
-                        next(error, job);
-
-                    });
-                }
-
-                //save a new job
-                else {
-
-                    previousSave.call(this, function(error) {
-                        next(error, this);
-                    }.bind(this));
-
-                }
-
-            }.bind(this),
-
-            function _saveUniqueJobsData(job, next) {
-                //save job unique data
-                var uniqueJobData = {};
-
-                uniqueJobData[job.data.unique] = job.id;
-
-                Job.saveUniqueJobsData(uniqueJobData, function(error /*,uniqueJobsData*/ ) {
-                    next(error, job);
-                });
+            //flag job as already exist
+            if (job) {
+              job.alreadyExist = true;
             }
 
-        ], function(error, job) {
-            return done(error, job);
+            next(error, job);
+
+          });
+        }
+
+        //save a new job
+        else {
+
+          previousSave.call(this, function (error) {
+            next(error, this);
+          }.bind(this));
+
+        }
+
+      }.bind(this),
+
+      function _saveUniqueJobsData(job, next) {
+        //save job unique data
+        var uniqueJobData = {};
+
+        uniqueJobData[job.data.unique] = job.id;
+
+        Job.saveUniqueJobsData(uniqueJobData, function (error /*,uniqueJobsData*/ ) {
+          next(error, job);
         });
+      }
 
-    }
+    ], function (error, job) {
+      return done(error, job);
+    });
 
-    //otherwise save a job
-    else {
-        return previousSave.call(this, done);
-    }
+  }
+
+  //otherwise save a job
+  else {
+    return previousSave.call(this, done);
+  }
 
 };
 
 
 //patch job remove with unique checkup
 var previousRemove = Job.prototype.remove;
-Job.prototype.remove = function(done) {
-    //correct callback
-    done = done || noop;
+Job.prototype.remove = function (done) {
+  //correct callback
+  done = done || noop;
 
-    async.parallel({
+  async.parallel({
 
-        removeJob: function(next) {
-            previousRemove.call(this, next);
-        }.bind(this),
+    removeJob: function (next) {
+      previousRemove.call(this, next);
+    }.bind(this),
 
-        removeUniqueData: function(next) {
-            Job.removeUniqueJobData(this.id, next);
-        }.bind(this)
+    removeUniqueData: function (next) {
+      Job.removeUniqueJobData(this.id, next);
+    }.bind(this)
 
-    }, function finalize(error /*, results*/ ) {
-        done(error, this);
-    }.bind(this));
+  }, function finalize(error /*, results*/ ) {
+    done(error, this);
+  }.bind(this));
 
-    return this;
+  return this;
 };
 
 
