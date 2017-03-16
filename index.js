@@ -121,7 +121,7 @@ Job.removeUniqueJobData = function (id, done) {
 
       Job
         .client
-        .hdel(key, unique, function (error /*, response*/ ) {
+        .hdel(key, unique || '', function (error /*, response*/ ) {
           next(error);
         });
     },
