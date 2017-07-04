@@ -116,7 +116,9 @@ Job.removeUniqueJobData = function (id, done) {
       //we have an id, lets find the key name.
       //
       var unique = Object.keys(uniqueJobsData).filter(function (key) {
-        return uniqueJobsData[key] === parseInt(id, 10);
+	var uniqueId = uniqueJobsData[key];
+	id = (typeof uniqueId === 'number') ? parseInt(id, 10) : id;
+        return uniqueId === id;
       })[0];
 
       Job
