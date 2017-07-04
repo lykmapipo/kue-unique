@@ -116,12 +116,13 @@ Job.removeUniqueJobData = function (id, done) {
       //we have an id, lets find the key name.
       //
       var unique = Object.keys(uniqueJobsData).filter(function (key) {
-        return uniqueJobsData[key] === id;
+        return uniqueJobsData[key] === parseInt(id, 10);
       })[0];
 
       Job
         .client
         .hdel(key, unique || '', function (error /*, response*/ ) {
+          console.log('err', error)
           next(error);
         });
     },
