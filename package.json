@@ -31,10 +31,12 @@
     "url": "https://github.com/lykmapipo/kue-unique/issues"
   },
   "homepage": "https://github.com/lykmapipo/kue-unique",
-  "contributors": [{
-    "name": "lykmapipo",
-    "github": "https://github.com/lykmapipo"
-  }],
+  "contributors": [
+    {
+      "name": "lykmapipo",
+      "github": "https://github.com/lykmapipo"
+    }
+  ],
   "devDependencies": {
     "async": "^1.4.2",
     "chai": "^3.3.0",
