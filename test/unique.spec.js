@@ -23,7 +23,7 @@ describe('kue unique', function () {
 
   it('should be able to compute unique jobs store key', function (done) {
     expect(Job.getUniqueJobsKey).to.exist;
-    expect(Job.getUniqueJobsKey).to.be.a.function;
+    expect(Job.getUniqueJobsKey).to.be.a('function');
     expect(Job.getUniqueJobsKey()).to.be.equal(q.client.getKey(
       'unique:jobs'));
     done();
@@ -31,7 +31,7 @@ describe('kue unique', function () {
 
   it('should be able to add unique method to job prototype', function (done) {
     expect(Job.prototype.unique).to.exist;
-    expect(Job.prototype.unique).to.be.a.function;
+    expect(Job.prototype.unique).to.be.a('function');
     done();
   });
 
