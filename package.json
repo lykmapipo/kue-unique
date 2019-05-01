@@ -45,7 +45,7 @@
     "grunt-mocha-test": "^0.13.3",
     "jshint-stylish": "^2.2.1",
     "kue": ">=0.11.6",
-    "mocha": "^6.1.3"
+    "mocha": "^6.1.4"
   },
   "peerDependencies": {
     "kue": ">=0.11.6"
