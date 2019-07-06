@@ -48,6 +48,7 @@
     "jshint-stylish": "^2.2.1",
     "kue": ">=0.11.6",
     "mocha": "^6.1.4",
+    "shelljs": "^0.8.3",
     "uuid": "^3.3.2"
   },
   "peerDependencies": {
