@@ -44,7 +44,7 @@
     "grunt": "^1.0.4",
     "grunt-contrib-jshint": "^2.1.0",
     "grunt-mocha-test": "^0.13.3",
-    "handlebars": "^4.4.5",
+    "handlebars": "^4.5.2",
     "jshint-stylish": "^2.2.1",
     "kue": ">=0.11.6",
     "mocha": "^6.2.2",
