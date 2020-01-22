@@ -1,6 +1,6 @@
 {
   "name": "kue-unique",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "description": "Unique job utility for kue",
   "main": "index.js",
   "scripts": {
