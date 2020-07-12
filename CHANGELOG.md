@@ -1,3 +1,9 @@
+#### 1.0.40 (2020-07-12)
+
+##### Chores
+
+* **deps:**  force latest version & audit fix ([c08629ab](https://github.com/lykmapipo/kue-unique/commit/c08629ab1b168a989c02fc2cd517e668d07f3f17))
+
 #### 1.0.39 (2020-07-02)
 
 ##### Chores
