@@ -1,3 +1,9 @@
+#### 1.1.0 (2020-12-22)
+
+##### Other Changes
+
+* //github.com/3dcl/kue-unique into 3dcl-master ([9db67f6c](https://github.com/lykmapipo/kue-unique/commit/9db67f6c8990c613e1dfdbb621c021377a63a5af))
+
 #### 1.0.48 (2020-12-21)
 
 ##### Chores
