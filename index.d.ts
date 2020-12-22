@@ -1,4 +1,4 @@
-import Kue from 'kue';
+import * as Kue from 'kue';
 
 export declare class Job extends Kue.Job {
   unique(uniqueKey: string): Job;
