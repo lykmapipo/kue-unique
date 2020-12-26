@@ -1,9 +1,4 @@
-/**
- * @description example of ensuring unique job
- */
-
-// require('kue-unique') here
-const kue = require('../src/index');
+import kue from '../src/index';
 
 const q = kue.createQueue();
 
