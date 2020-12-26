@@ -68,8 +68,10 @@
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
     "@commitlint/travis-cli": "^11.0.0",
+    "@lykmapipo/kue-common": "^0.6.26",
     "@lykmapipo/test-helpers": "^0.6.7",
     "@rollup/plugin-json": "^4.1.0",
+    "@types/kue": "^0.11.13",
     "chai": "^4.2.0",
     "commitizen": "^4.2.2",
     "coveralls": "^3.1.0",
@@ -86,6 +88,7 @@
     "generate-changelog": "^1.8.0",
     "handlebars": "^4.7.6",
     "husky": "^4.3.6",
+    "kue": ">=0.11.6",
     "lint-staged": "^10.5.3",
     "lodash.template": "^4.5.0",
     "mime": "^2.4.7",
@@ -97,15 +100,12 @@
     "rimraf": "^3.0.2",
     "rollup": "^2.35.1",
     "shelljs": "^0.8.4",
-    "kue": ">=0.11.6",
-    "@types/kue": "^0.11.13",
     "uuid": "^8.3.2"
   },
   "peerDependencies": {
     "kue": ">=0.11.6"
   },
   "dependencies": {
-    "@lykmapipo/common": ">=0.42.5",
     "async": ">=3.2.0",
     "lodash": ">=4.17.20"
   },

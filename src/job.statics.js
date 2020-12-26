@@ -1,8 +1,11 @@
 import { isNull, isNumber, find, first, forEach, keys, toNumber } from 'lodash';
 import { waterfall } from 'async';
-import Job from 'kue';
+import { Job } from 'kue';
 
-// TODO: honour other kue id types
+const castToNumber = (value) => {
+  const casted = toNumber(value);
+  return Number.isNaN(casted) ? value : casted;
+};
 
 /**
  * @function getUniqueJobsKey
@@ -50,9 +53,7 @@ export const getUniqueJobsData = (done) => {
     // deserialize string values to number
     // once fetched from redis
     forEach(data, (value, key) => {
-      if (!Number.isNaN(value)) {
-        data[key] = toNumber(value);
-      }
+      data[key] = castToNumber(value);
     });
 
     // return fetched jobs data
@@ -89,7 +90,7 @@ export const getUniqueJobData = (unique, done) => {
 
     // parse found job data
     if (results) {
-      data[unique] = !Number.isNaN(data) ? toNumber(results) : results;
+      data[unique] = castToNumber(results);
     }
 
     // return fetched job data

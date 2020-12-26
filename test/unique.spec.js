@@ -1,45 +1,34 @@
-// dependencies
-const { expect } = require('chai');
-const faker = require('@lykmapipo/test-helpers');
-const _ = require('lodash');
-const async = require('async');
-const kue = require('../src/index');
-
-const { Job } = kue;
-let q;
+import { expect, faker } from '@lykmapipo/test-helpers';
+import { createJob } from '@lykmapipo/kue-common';
+import _ from 'lodash';
+import async from 'async';
+import { Job } from 'kue';
+import '../src/index';
 
 describe('kue unique', () => {
-  before((done) => {
-    q = kue.createQueue();
-    done();
-  });
-
-  after((done) => {
-    q.shutdown(done);
-  });
-
-  it('should be able to compute unique jobs store key', (done) => {
+  it('should compute unique jobs store key', (done) => {
     expect(Job.getUniqueJobsKey).to.exist;
     expect(Job.getUniqueJobsKey).to.be.a('function');
-    expect(Job.getUniqueJobsKey()).to.be.equal(q.client.getKey('unique:jobs'));
+    expect(Job.getUniqueJobsKey()).to.be.equal(
+      Job.client.getKey('unique:jobs')
+    );
     done();
   });
 
-  it('should be able to add unique method to job prototype', (done) => {
+  it('should add unique method to job prototype', (done) => {
     expect(Job.prototype.unique).to.exist;
     expect(Job.prototype.unique).to.be.a('function');
     done();
   });
 
-  it('should be able to extend job data with unique key', (done) => {
+  it('should extend job data with unique key', (done) => {
     const unique = faker.name.firstName();
 
-    const job = q
-      .create('email', {
-        title: faker.lorem.sentence(),
-        to: faker.internet.email(),
-      })
-      .unique(unique);
+    const job = createJob({
+      type: 'email',
+      title: faker.lorem.sentence(),
+      to: faker.internet.email(),
+    }).unique(unique);
 
     expect(job.data.unique).to.exist;
     expect(job.data.unique).to.be.equal(unique);
@@ -47,7 +36,7 @@ describe('kue unique', () => {
     done();
   });
 
-  it('should be able to save job unique data', (done) => {
+  it('should save job unique data', (done) => {
     const uniqueJobData = {};
     uniqueJobData[faker.random.uuid()] = faker.name.firstName();
 
@@ -59,7 +48,7 @@ describe('kue unique', () => {
     });
   });
 
-  it('should be able to get job unique data using its `unique identifier`', (done) => {
+  it('should  get job unique data using its `unique identifier`', (done) => {
     const uniqueJobData = {};
     uniqueJobData[faker.random.uuid()] = faker.name.firstName();
 
@@ -84,7 +73,7 @@ describe('kue unique', () => {
     );
   });
 
-  it('should be able to remove job unique data from jobs unique data', (done) => {
+  it('should remove job unique data from jobs unique data', (done) => {
     const uniqueJobData = {};
     uniqueJobData[faker.random.uuid()] = faker.name.firstName();
 
@@ -115,10 +104,11 @@ describe('kue unique', () => {
     );
   });
 
-  it('should be able to save unique job', (done) => {
+  it('should save unique job', (done) => {
     const unique = faker.name.firstName();
 
-    q.create('email', {
+    createJob({
+      type: 'email',
       title: faker.lorem.sentence(),
       to: faker.internet.email(),
     })
@@ -131,14 +121,15 @@ describe('kue unique', () => {
       });
   });
 
-  it('should be able to return same unique job if saved multiple times', (done) => {
+  it('should return same unique job if saved multiple times', (done) => {
     const unique = faker.name.firstName();
 
     async.waterfall(
       [
         // save first job
         (next) => {
-          q.create('email', {
+          createJob({
+            type: 'email',
             title: faker.lorem.sentence(),
             to: faker.internet.email(),
           })
@@ -149,7 +140,8 @@ describe('kue unique', () => {
         // later try to save another
         // job with same unique value
         (job1, next) => {
-          q.create('email', {
+          createJob({
+            type: 'email',
             title: faker.lorem.sentence(),
             to: faker.internet.email(),
           })
@@ -171,13 +163,12 @@ describe('kue unique', () => {
     );
   });
 
-  it('should be able to save non-unique jobs as normal', (done) => {
-    const job = q
-      .create('email', {
-        title: faker.lorem.sentence(),
-        to: faker.internet.email(),
-      })
-      .save();
+  it('should save non-unique jobs as normal', (done) => {
+    const job = createJob({
+      type: 'email',
+      title: faker.lorem.sentence(),
+      to: faker.internet.email(),
+    }).save();
 
     expect(job).to.exist;
     expect(job.data).to.exist;
@@ -185,14 +176,15 @@ describe('kue unique', () => {
     done();
   });
 
-  it('should be able to remove saved unique job and its associated data', (done) => {
+  it.skip('should remove saved unique job and its associated data', (done) => {
     const unique = faker.name.firstName();
     let _job;
 
     async.waterfall(
       [
         function save(next) {
-          q.create('email', {
+          createJob({
+            type: 'email',
             title: faker.lorem.sentence(),
             to: faker.internet.email(),
           })
@@ -240,8 +232,9 @@ describe('kue unique', () => {
     );
   });
 
-  it('should be able to remove non-unique jobs as normal', (done) => {
-    let job = q.create('email', {
+  it('should remove non-unique jobs as normal', (done) => {
+    let job = createJob({
+      type: 'email',
       title: faker.lorem.sentence(),
       to: faker.internet.email(),
     });

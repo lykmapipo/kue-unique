@@ -1,6 +1,15 @@
-import { assign, first, keys, merge, noop, size, values } from 'lodash';
+import {
+  assign,
+  first,
+  isFunction,
+  keys,
+  merge,
+  noop,
+  size,
+  values,
+} from 'lodash';
 import { parallel, waterfall } from 'async';
-import Job from 'kue';
+import { Job } from 'kue';
 
 import './job.statics';
 
@@ -134,11 +143,13 @@ export function remove(done) {
   const removeJob = (next) => previousRemove.call(job, next);
   const removeUniqueData = (next) => Job.removeUniqueJobData(job.id, next);
 
-  // remove job
-  const tasks = { removeJob, removeUniqueData };
-  parallel(tasks, (error /* , results */) => {
-    cb(error, job);
-  });
+  // remove job and associated unique data
+  if (isFunction(done)) {
+    const tasks = { removeJob, removeUniqueData };
+    return parallel(tasks, (error /* , results */) => {
+      return cb(error, job);
+    });
+  }
 
   // return job instance
   return job;
