@@ -1,8 +1,12 @@
 language: node_js
-node_js:
-  - "11.12.0"
-before_script:
-  - npm install -g grunt-cli
-  - redis-cli config set notify-keyspace-events Ex
 services:
+  #  - mongodb
   - redis-server
+node_js:
+  - node
+before_script:
+  - redis-cli config set notify-keyspace-events Ex
+script:
+  - commitlint-travis
+  - npm test
+after_success: npm run coverage
