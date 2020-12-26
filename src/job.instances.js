@@ -92,9 +92,11 @@ export function save(done) {
 
   const saveUniqueJobsData = (saved, next) => {
     // save job unique data
-    const uniqueJobData = {};
+    const uniqueKey = job.data.unique;
+    const jobId = saved.id;
 
-    uniqueJobData[job.data.unique] = saved.id;
+    const uniqueJobData = {};
+    uniqueJobData[uniqueKey] = jobId;
 
     Job.saveUniqueJobsData(uniqueJobData, (error /* ,uniqueJobsData */) => {
       next(error, saved);

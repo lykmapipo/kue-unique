@@ -1,7 +1,8 @@
+import { values } from 'lodash';
+import { parallel, waterfall } from 'async';
 import { expect, faker } from '@lykmapipo/test-helpers';
 import { createJob } from '@lykmapipo/kue-common';
-import _ from 'lodash';
-import async from 'async';
+
 import { Job } from 'kue';
 import '../src/index';
 
@@ -22,51 +23,90 @@ describe('kue unique', () => {
   });
 
   it('should extend job data with unique key', (done) => {
-    const unique = faker.name.firstName();
+    const uniqueKey = faker.random.uuid();
 
     const job = createJob({
       type: 'email',
       title: faker.lorem.sentence(),
       to: faker.internet.email(),
-    }).unique(unique);
+    }).unique(uniqueKey);
 
     expect(job.data.unique).to.exist;
-    expect(job.data.unique).to.be.equal(unique);
+    expect(job.data.unique).to.be.equal(uniqueKey);
 
     done();
   });
 
-  it('should save job unique data', (done) => {
+  it('should save job unique data with number ids type', (done) => {
     const uniqueJobData = {};
-    uniqueJobData[faker.random.uuid()] = faker.name.firstName();
+    const uniqueKey = faker.random.uuid();
+    const jobId = faker.random.number();
+    uniqueJobData[uniqueKey] = jobId;
 
     Job.saveUniqueJobsData(uniqueJobData, (error, uniqueJobsData) => {
       expect(error).to.not.exist;
       expect(uniqueJobsData).to.exist;
-      expect(uniqueJobsData).to.eql(uniqueJobData);
+      expect(uniqueJobsData[uniqueKey]).to.eql(jobId);
       done(error, uniqueJobsData);
     });
   });
 
-  it('should  get job unique data using its `unique identifier`', (done) => {
+  it('should save job unique data with other ids type', (done) => {
     const uniqueJobData = {};
-    uniqueJobData[faker.random.uuid()] = faker.name.firstName();
+    const uniqueKey = faker.random.uuid();
+    const jobId = faker.random.uuid();
+    uniqueJobData[uniqueKey] = jobId;
 
-    async.waterfall(
+    Job.saveUniqueJobsData(uniqueJobData, (error, uniqueJobsData) => {
+      expect(error).to.not.exist;
+      expect(uniqueJobsData).to.exist;
+      expect(uniqueJobsData[uniqueKey]).to.eql(jobId);
+      done(error, uniqueJobsData);
+    });
+  });
+
+  it('should get job unique data using its unique key', (done) => {
+    const uniqueJobData = {};
+    const uniqueKey = faker.random.uuid();
+    const jobId = faker.random.uuid();
+    uniqueJobData[uniqueKey] = jobId;
+
+    waterfall(
       [
-        function save(next) {
+        (next) => {
           Job.saveUniqueJobsData(uniqueJobData, next);
         },
-        function get(savedUniqueJobData, next) {
-          Job.getUniqueJobData(
-            _.keys(uniqueJobData)[0],
-            (error, foundUniqueJobData) => {
-              expect(error).to.not.exist;
-              expect(foundUniqueJobData).to.exist;
-              expect(foundUniqueJobData).to.eql(uniqueJobData);
-              next(error, foundUniqueJobData);
-            }
-          );
+        (savedUniqueJobData, next) => {
+          Job.getUniqueJobData(uniqueKey, (error, foundUniqueJobData) => {
+            expect(error).to.not.exist;
+            expect(foundUniqueJobData).to.exist;
+            expect(foundUniqueJobData[uniqueKey]).to.eql(jobId);
+            next(error, foundUniqueJobData);
+          });
+        },
+      ],
+      done
+    );
+  });
+
+  it('should get job unique data using its unique key', (done) => {
+    const uniqueJobData = {};
+    const uniqueKey = faker.random.uuid();
+    const jobId = faker.random.number();
+    uniqueJobData[uniqueKey] = jobId;
+
+    waterfall(
+      [
+        (next) => {
+          Job.saveUniqueJobsData(uniqueJobData, next);
+        },
+        (savedUniqueJobData, next) => {
+          Job.getUniqueJobData(uniqueKey, (error, foundUniqueJobData) => {
+            expect(error).to.not.exist;
+            expect(foundUniqueJobData).to.exist;
+            expect(foundUniqueJobData[uniqueKey]).to.eql(jobId);
+            next(error, foundUniqueJobData);
+          });
         },
       ],
       done
@@ -75,28 +115,29 @@ describe('kue unique', () => {
 
   it('should remove job unique data from jobs unique data', (done) => {
     const uniqueJobData = {};
-    uniqueJobData[faker.random.uuid()] = faker.name.firstName();
+    const uniqueKey = faker.random.uuid();
+    const jobId = faker.random.uuid();
+    uniqueJobData[uniqueKey] = jobId;
 
-    async.waterfall(
+    waterfall(
       [
-        function save(next) {
+        (next) => {
           Job.saveUniqueJobsData(uniqueJobData, next);
         },
-        function assertSaved(savedUniqueJobsData, next) {
-          const id = _.values(uniqueJobData)[0];
-          expect(_.values(savedUniqueJobsData)).to.contain(id);
-          next(null, id);
+        (savedUniqueJobsData, next) => {
+          expect(values(savedUniqueJobsData)).to.contain(jobId);
+          next(null, jobId);
         },
 
-        function remove(id, next) {
+        (id, next) => {
           Job.removeUniqueJobData(id, (error, uniqueJobsData) => {
             expect(error).to.not.exist;
             expect(uniqueJobsData).to.exist;
             next(error, uniqueJobsData, id);
           });
         },
-        function assertRemoved(uniqueJobsData, id, next) {
-          expect(_.values(uniqueJobsData)).to.not.contain(id);
+        (uniqueJobsData, id, next) => {
+          expect(values(uniqueJobsData)).to.not.contain(id);
           next(null, id);
         },
       ],
@@ -105,26 +146,25 @@ describe('kue unique', () => {
   });
 
   it('should save unique job', (done) => {
-    const unique = faker.name.firstName();
+    const uniqueKey = faker.name.firstName();
 
     createJob({
       type: 'email',
       title: faker.lorem.sentence(),
       to: faker.internet.email(),
     })
-      .unique(unique)
+      .unique(uniqueKey)
       .save((error, job) => {
         expect(job).to.exist;
         expect(job.data).to.exist;
-
         done();
       });
   });
 
   it('should return same unique job if saved multiple times', (done) => {
-    const unique = faker.name.firstName();
+    const uniqueKey = faker.random.uuid();
 
-    async.waterfall(
+    waterfall(
       [
         // save first job
         (next) => {
@@ -133,7 +173,7 @@ describe('kue unique', () => {
             title: faker.lorem.sentence(),
             to: faker.internet.email(),
           })
-            .unique(unique)
+            .unique(uniqueKey)
             .save(next);
         },
 
@@ -145,7 +185,7 @@ describe('kue unique', () => {
             title: faker.lorem.sentence(),
             to: faker.internet.email(),
           })
-            .unique(unique)
+            .unique(uniqueKey)
             .save((error, job2) => {
               next(error, job1, job2);
             });
@@ -176,47 +216,47 @@ describe('kue unique', () => {
     done();
   });
 
-  it.skip('should remove saved unique job and its associated data', (done) => {
-    const unique = faker.name.firstName();
-    let _job;
+  it('should remove saved unique job and its associated data', (done) => {
+    const uniqueKey = faker.random.uuid();
+    let removed;
 
-    async.waterfall(
+    waterfall(
       [
-        function save(next) {
+        (next) => {
           createJob({
             type: 'email',
             title: faker.lorem.sentence(),
             to: faker.internet.email(),
           })
-            .unique(unique)
+            .unique(uniqueKey)
             .save(next);
         },
 
-        function remove(job, next) {
+        (job, next) => {
           job.remove(next);
         },
 
-        function assertRemove(job, next) {
+        (job, next) => {
           expect(job).to.exist;
-          _job = job;
+          removed = job;
           next(null, job);
         },
 
-        function getRemoveJob(job, next) {
-          async.parallel(
+        (job, next) => {
+          parallel(
             {
-              job: function getJob(_next) {
-                Job.get(job.id, (error /* , job */) => {
+              job: (then) => {
+                Job.get(job.id, (error, found) => {
                   expect(error).to.exist;
                   expect(error.message).to.be.equal(
-                    `job "${_job.id}" doesnt exist`
+                    `job "${removed.id}" doesnt exist`
                   );
 
-                  _next(null, job);
+                  then(null, found);
                 });
               },
-              data: function getUniqueJobsData(_next) {
-                Job.getUniqueJobsData(_next);
+              data: (then) => {
+                Job.getUniqueJobsData(then);
               },
             },
             next
@@ -225,7 +265,7 @@ describe('kue unique', () => {
       ],
       (error, results) => {
         expect(results.job).to.not.exist;
-        expect(_.values(results.data)).to.not.contain(_job.id);
+        expect(values(results.data)).to.not.contain(removed.id);
 
         done();
       }

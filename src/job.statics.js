@@ -65,7 +65,7 @@ export const getUniqueJobsData = (done) => {
  * @function getUniqueJobData
  * @name getUniqueJobData
  * @description Retrieved saved unique job data
- * @param {string} unique unique job identifier
+ * @param {string} uniqueKey unique job identifier
  * @param {Function} done callback to invoke on success or failure
  * @returns {object} unique job data
  * @author lally elias <lallyelias87@mail.com>
@@ -75,11 +75,11 @@ export const getUniqueJobsData = (done) => {
  * @static
  * @public
  */
-export const getUniqueJobData = (unique, done) => {
+export const getUniqueJobData = (uniqueKey, done) => {
   // obtain unique jobs key
   const uniqueJobsKey = getUniqueJobsKey();
 
-  return Job.client.hget(uniqueJobsKey, unique, (error, results) => {
+  return Job.client.hget(uniqueJobsKey, uniqueKey, (error, results) => {
     // back-off on error
     if (error) {
       return done(error);
@@ -90,7 +90,7 @@ export const getUniqueJobData = (unique, done) => {
 
     // parse found job data
     if (results) {
-      data[unique] = castToNumber(results);
+      data[uniqueKey] = castToNumber(results);
     }
 
     // return fetched job data
@@ -116,12 +116,12 @@ export const saveUniqueJobsData = (uniqueJobData, done) => {
   // obtain unique jobs key
   const uniqueJobsKey = getUniqueJobsKey();
 
-  // convert to field and job data
-  const field = first(keys(uniqueJobData));
-  const data = field ? uniqueJobData[field] : undefined;
+  // convert to unique key and job data
+  const uniqueKey = first(keys(uniqueJobData));
+  const data = uniqueKey ? uniqueJobData[uniqueKey] : undefined;
 
   // save unique job data
-  return Job.client.hset(uniqueJobsKey, field, data, (error) => {
+  return Job.client.hset(uniqueJobsKey, uniqueKey, data, (error) => {
     // back-off on error
     if (error) {
       return done(error);
