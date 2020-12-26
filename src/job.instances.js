@@ -29,6 +29,13 @@ const previousRemove = Job.prototype.remove;
  * @version 0.1.0
  * @instance
  * @public
+ * @example
+ * const job = queue.create('email', {
+ *   title: 'welcome email for tj',
+ *   to: 'tj@learnboost.com',
+ *   template: 'welcome-email'
+ *  })
+ *  .unique(<job_unique_identifier>)
  */
 export function unique(uniqueKey) {
   // ensure job data
@@ -52,6 +59,24 @@ export function unique(uniqueKey) {
  * @version 0.1.0
  * @instance
  * @public
+ * @example
+ * const job = queue.create('email', {
+ *   title: 'welcome email for tj',
+ *   to: 'tj@learnboost.com',
+ *   template: 'welcome-email'
+ *  })
+ *  .unique(<job_unique_identifier>)
+ *  .save()
+ *
+ * // or
+ *
+ * const job = queue.create('email', {
+ *   title: 'welcome email for tj',
+ *   to: 'tj@learnboost.com',
+ *   template: 'welcome-email'
+ *  })
+ *  .unique(<job_unique_identifier>)
+ *  .save((error) => { ... })
  */
 export function save(done) {
   // reference current job
@@ -90,7 +115,7 @@ export function save(done) {
     }
   };
 
-  const saveUniqueJobsData = (saved, next) => {
+  const trySaveUniqueJobsData = (saved, next) => {
     // save job unique data
     const uniqueKey = job.data.unique;
     const jobId = saved.id;
@@ -111,7 +136,7 @@ export function save(done) {
     const tasks = [
       tryGetExistingJobData,
       tryGetExistingOrSaveJob,
-      saveUniqueJobsData,
+      trySaveUniqueJobsData,
     ];
     return waterfall(tasks, cb);
   }
@@ -133,6 +158,16 @@ export function save(done) {
  * @version 0.1.0
  * @instance
  * @public
+ * @example
+ * const job = queue.create('email', {
+ *   title: 'welcome email for tj',
+ *   to: 'tj@learnboost.com',
+ *   template: 'welcome-email'
+ *  })
+ *  .unique(<job_unique_identifier>)
+ *  .save()
+ *
+ * job.remove((error, job) => { ... });
  */
 export function remove(done) {
   // reference current job

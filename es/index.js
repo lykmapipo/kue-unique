@@ -1,6 +1,22 @@
-import { isNull, isNumber, find, first, forEach, keys, toNumber } from 'lodash';
-import { waterfall } from 'async';
+import {
+  isNull,
+  forEach,
+  first,
+  keys,
+  toNumber,
+  find,
+  isNumber,
+  merge,
+  isFunction,
+  noop,
+  size,
+  values,
+  assign,
+} from 'lodash';
+import { waterfall, parallel } from 'async';
 import { Job } from 'kue';
+
+export { default } from 'kue';
 
 const castToNumber = (value) => {
   const casted = toNumber(value);
@@ -21,7 +37,7 @@ const castToNumber = (value) => {
  * @example
  * Job.getUniqueJobsKey(); //=> q:unique:jobs
  */
-export const getUniqueJobsKey = () => {
+const getUniqueJobsKey = () => {
   return Job.client.getKey('unique:jobs');
 };
 
@@ -40,7 +56,7 @@ export const getUniqueJobsKey = () => {
  * @example
  * Job.getUniqueJobsData((error, data) => { ... });
  */
-export const getUniqueJobsData = (done) => {
+const getUniqueJobsData = (done) => {
   // obtain unique jobs key
   const uniqueJobsKey = getUniqueJobsKey();
 
@@ -81,7 +97,7 @@ export const getUniqueJobsData = (done) => {
  * @example
  * Job.getUniqueJobData((error, data) => { ... });
  */
-export const getUniqueJobData = (uniqueKey, done) => {
+const getUniqueJobData = (uniqueKey, done) => {
   // obtain unique jobs key
   const uniqueJobsKey = getUniqueJobsKey();
 
@@ -120,7 +136,7 @@ export const getUniqueJobData = (uniqueKey, done) => {
  * @example
  * Job.saveUniqueJobsData(data, (error, data) => { ... });
  */
-export const saveUniqueJobsData = (uniqueJobData, done) => {
+const saveUniqueJobsData = (uniqueJobData, done) => {
   // obtain unique jobs key
   const uniqueJobsKey = getUniqueJobsKey();
 
@@ -156,7 +172,7 @@ export const saveUniqueJobsData = (uniqueJobData, done) => {
  * @example
  * Job.removeUniqueJobData(1, (error, data) => { ... });
  */
-export const removeUniqueJobData = (jobId, done) => {
+const removeUniqueJobData = (jobId, done) => {
   // obtain unique jobs key
   const uniqueJobsKey = getUniqueJobsKey();
 
@@ -194,3 +210,187 @@ Job.getUniqueJobsData = getUniqueJobsData;
 Job.getUniqueJobData = getUniqueJobData;
 Job.saveUniqueJobsData = saveUniqueJobsData;
 Job.removeUniqueJobData = removeUniqueJobData;
+
+// for patching
+const previousSave = Job.prototype.save;
+const previousRemove = Job.prototype.remove;
+
+/**
+ * @function unique
+ * @name unique
+ * @description Extend job data with unique identifier
+ * @param {string} uniqueKey a unique identifier for the job
+ * @returns {Job} a job instance
+ * @author lally elias <lallyelias87@mail.com>
+ * @license MIT
+ * @since 1.1.0
+ * @version 0.1.0
+ * @instance
+ * @public
+ * @example
+ * const job = queue.create('email', {
+ *   title: 'welcome email for tj',
+ *   to: 'tj@learnboost.com',
+ *   template: 'welcome-email'
+ *  })
+ *  .unique(<job_unique_identifier>)
+ */
+function unique(uniqueKey) {
+  // ensure job data
+  this.data = this.data || {};
+
+  // extend job data with unique key
+  merge(this.data, { unique: uniqueKey });
+
+  return this;
+}
+
+/**
+ * @function save
+ * @name save
+ * @description Save job and job unique data
+ * @param {Function} done callback to invoke on success or failure
+ * @returns {Job} a job instance
+ * @author lally elias <lallyelias87@mail.com>
+ * @license MIT
+ * @since 1.1.0
+ * @version 0.1.0
+ * @instance
+ * @public
+ * @example
+ * const job = queue.create('email', {
+ *   title: 'welcome email for tj',
+ *   to: 'tj@learnboost.com',
+ *   template: 'welcome-email'
+ *  })
+ *  .unique(<job_unique_identifier>)
+ *  .save()
+ *
+ * // or
+ *
+ * const job = queue.create('email', {
+ *   title: 'welcome email for tj',
+ *   to: 'tj@learnboost.com',
+ *   template: 'welcome-email'
+ *  })
+ *  .unique(<job_unique_identifier>)
+ *  .save((error) => { ... })
+ */
+function save(done) {
+  // reference current job
+  const job = this;
+
+  // ensure callback
+  const cb = done || noop;
+
+  // tasks
+  const tryGetExistingJobData = (next) => {
+    Job.getUniqueJobData(job.data.unique, next);
+  };
+
+  const tryGetExistingOrSaveJob = (uniqueJobData, next) => {
+    // try get existing job
+    const exists = size(keys(uniqueJobData)) > 0;
+
+    // get existing job
+    if (exists) {
+      const id = first(values(uniqueJobData));
+      Job.get(id, (error, existing) => {
+        // flag job as already exist
+        if (existing) {
+          assign(existing, { alreadyExist: true });
+        }
+
+        next(error, existing);
+      });
+    }
+
+    // save a new job
+    else {
+      previousSave.call(job, (error) => {
+        next(error, job);
+      });
+    }
+  };
+
+  const trySaveUniqueJobsData = (saved, next) => {
+    // save job unique data
+    const uniqueKey = job.data.unique;
+    const jobId = saved.id;
+
+    const uniqueJobData = {};
+    uniqueJobData[uniqueKey] = jobId;
+
+    Job.saveUniqueJobsData(uniqueJobData, (error /* ,uniqueJobsData */) => {
+      next(error, saved);
+    });
+  };
+
+  // check if job is unique
+  const isUniqueJob = this.data && this.data.unique;
+
+  // try save unique job with unique data
+  if (isUniqueJob) {
+    const tasks = [
+      tryGetExistingJobData,
+      tryGetExistingOrSaveJob,
+      trySaveUniqueJobsData,
+    ];
+    return waterfall(tasks, cb);
+  }
+
+  // otherwise save a job
+
+  return previousSave.call(job, cb);
+}
+
+/**
+ * @function remove
+ * @name remove
+ * @description Remove job and job unique data
+ * @param {Function} done callback to invoke on success or failure
+ * @returns {Job} a job instance
+ * @author lally elias <lallyelias87@mail.com>
+ * @license MIT
+ * @since 1.1.0
+ * @version 0.1.0
+ * @instance
+ * @public
+ * @example
+ * const job = queue.create('email', {
+ *   title: 'welcome email for tj',
+ *   to: 'tj@learnboost.com',
+ *   template: 'welcome-email'
+ *  })
+ *  .unique(<job_unique_identifier>)
+ *  .save()
+ *
+ * job.remove((error, job) => { ... });
+ */
+function remove(done) {
+  // reference current job
+  const job = this;
+
+  // ensure callback
+  const cb = done || noop;
+
+  // tasks
+  const removeJob = (next) => previousRemove.call(job, next);
+  const removeUniqueData = (next) => Job.removeUniqueJobData(job.id, next);
+
+  // remove job and associated unique data
+  if (isFunction(done)) {
+    const tasks = { removeJob, removeUniqueData };
+    return parallel(tasks, (error /* , results */) => {
+      return cb(error, job);
+    });
+  }
+
+  // return job instance
+  return job;
+}
+
+// attach instance methods to Job
+Job.prototype.unique = unique;
+Job.prototype.save = save;
+Job.prototype.remove = remove;
